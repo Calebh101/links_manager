@@ -31,10 +31,22 @@ dependencies:
   flutter:
     sdk: flutter
 
+  localpkg_flutter:
+    git:
+      url: https://github.com/Calebh101/localpkg-flutter-2.git
+      ref: 93d88f46a91e5c4172078bfcc10e3fdceba6f38f
+
+  calebh101_server_flutter:
+    git:
+      url: https://github.com/Calebh101/calebh101_server.git
+      ref: main
+      path: flutter
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   flutter_launcher_icons: ^0.14.4
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
