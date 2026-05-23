@@ -1,9 +1,11 @@
 import 'package:calebh101_server_flutter/calebh101_server_flutter.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:links/main.dart';
 import 'package:links/new.dart';
 import 'package:localpkg_flutter/functions.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -75,7 +77,28 @@ class _LinkWidgetState extends State<LinkWidget> {
 
     return ListTile(
       title: Text(link.id),
-      subtitle: Text(DateFormat('MMMM d, yyyy, h:mm a', Localizations.localeOf(context).toLanguageTag()).format(link.created)),
+      subtitle: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+              text: "${DateFormat('MMMM d, yyyy, h:mm a', Localizations.localeOf(context).toLanguageTag()).format(link.created)}\n",
+            ),
+            TextSpan(
+              text: link.logic.defaultUrl,
+              style: TextStyle(
+                color: Colors.blue,
+              ),
+              recognizer: TapGestureRecognizer()..onTap = () async {
+                if (await canLaunchUrlString(link.logic.defaultUrl)) await launchUrlString(link.logic.defaultUrl);
+              },
+            ),
+            TextSpan(
+              text: link.logic.paths.isEmpty ? "" : "*",
+            ),
+          ],
+        ),
+      ),
+      isThreeLine: true,
     );
   }
 }

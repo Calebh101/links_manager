@@ -37,9 +37,9 @@ packages:
     dependency: transitive
     description:
       path: "."
-      ref: d0d5093ee1a5ad10b10d62a1359a08c3ce79d531
-      resolved-ref: d0d5093ee1a5ad10b10d62a1359a08c3ce79d531
-      url: "https://github.com/Calebh101/calebh101_server.git"
+      ref: "0e1b55773841a3e387d2c3398e3c2ce105277f27"
+      resolved-ref: "0e1b55773841a3e387d2c3398e3c2ce105277f27"
+      url: "https://github.com/Calebh101/calebh101_server"
     source: git
     version: "1.0.0"
   calebh101_server_flutter:
@@ -47,8 +47,8 @@ packages:
     description:
       path: flutter
       ref: main
-      resolved-ref: d0d5093ee1a5ad10b10d62a1359a08c3ce79d531
-      url: "https://github.com/Calebh101/calebh101_server.git"
+      resolved-ref: "0e1b55773841a3e387d2c3398e3c2ce105277f27"
+      url: "https://github.com/Calebh101/calebh101_server"
     source: git
     version: "0.0.0"
   characters:
@@ -287,8 +287,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "93d88f46a91e5c4172078bfcc10e3fdceba6f38f"
-      resolved-ref: "93d88f46a91e5c4172078bfcc10e3fdceba6f38f"
+      ref: "94bb94067953abd2a63c36584db240988b7831c0"
+      resolved-ref: "94bb94067953abd2a63c36584db240988b7831c0"
       url: "https://github.com/Calebh101/localpkg-flutter-2.git"
     source: git
     version: "2.0.0"
@@ -344,9 +344,9 @@ packages:
     dependency: transitive
     description:
       path: api_client
-      ref: d0d5093ee1a5ad10b10d62a1359a08c3ce79d531
-      resolved-ref: d0d5093ee1a5ad10b10d62a1359a08c3ce79d531
-      url: "https://github.com/Calebh101/calebh101_server.git"
+      ref: "0e1b55773841a3e387d2c3398e3c2ce105277f27"
+      resolved-ref: "0e1b55773841a3e387d2c3398e3c2ce105277f27"
+      url: "https://github.com/Calebh101/calebh101_server"
     source: git
     version: "1.0.0"
   package_config:
@@ -595,7 +595,7 @@ packages:
     source: hosted
     version: "1.4.0"
   url_launcher:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: url_launcher
       sha256: f6a7e5c4835bb4e3026a04793a4199ca2d14c739ec378fdfe23fc8075d0439f8
