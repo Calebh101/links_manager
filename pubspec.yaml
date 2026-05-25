@@ -34,11 +34,11 @@ dependencies:
   localpkg_flutter:
     git:
       url: https://github.com/Calebh101/localpkg-flutter-2.git
-      ref: 94bb94067953abd2a63c36584db240988b7831c0
+      ref: 57217f74aac50aa47e224df05ed93126b4f95b60
 
   calebh101_server_flutter:
     git:
-      url: https://github.com/Calebh101/calebh101_server
+      url: https://github.com/Calebh101/calebh101_server.git
       ref: main
       path: flutter
 
@@ -48,6 +48,7 @@ dependencies:
   flutter_launcher_icons: ^0.14.4
   intl: ^0.20.2
   url_launcher: ^6.3.2
+  collection: ^1.19.1
 
 dev_dependencies:
   flutter_test:

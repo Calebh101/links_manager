@@ -1,4 +1,5 @@
 import 'package:calebh101_server_flutter/calebh101_server_flutter.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +7,49 @@ import 'package:links/main.dart';
 import 'package:links/new.dart';
 import 'package:localpkg_flutter/functions.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+
+typedef PathType = LinkGet200ResponseDataLogicPathsInnerConditionsInnerTypeEnum;
+
+List<LinkOptionsGet200ResponseDataInner>? schema;
+
+enum SortMode<T extends LinksGet200ResponseDataLinksInner> {
+  mostUsed("Most Used"),
+  leastUsed("Least Used"),
+  lastUsed("Recently Used"),
+  lastUsedReverse("Least Recently Used"),
+  youngestToOldest("Newest First"),
+  oldestToYoungest("Oldest First"),
+  ;
+
+  final String pretty;
+  const SortMode(this.pretty);
+
+  int sort(T a, T b) {
+    return switch (this) {
+      mostUsed => b.uses.compareTo(a.uses),
+      leastUsed => a.uses.compareTo(b.uses),
+      lastUsed => switch ((a.used, b.used)) {
+        (null, null) => b.created.compareTo(a.created),
+        (null, _) => 1,
+        (_, null) => -1,
+        (_, _) => b.used!.compareTo(a.used!),
+      },
+      lastUsedReverse => switch ((a.used, b.used)) {
+        (null, null) => a.created.compareTo(b.created),
+        (null, _) => 1,
+        (_, null) => -1,
+        (_, _) => a.used!.compareTo(b.used!),
+      },
+      youngestToOldest => b.created.compareTo(a.created),
+      oldestToYoungest => a.created.compareTo(b.created),
+    };
+  }
+}
+
+/// Unsafe.
+LinkOptionsGet200ResponseDataInner getFromId(String id) {
+  return schema!.firstWhere((x) => x.id.value == id);
+}
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -17,14 +61,31 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   LinksGet200Response? data;
   String? error;
+  SortMode sorting = SortMode.youngestToOldest;
 
   @override
   void initState() {
     super.initState();
-    reload();
+    init();
+  }
+
+  Future<void> init() async {
+    await client.request((DefaultApi api) => api.linkOptionsGet(), onData: (data) {
+      schema = data.data;
+      reload();
+    }, onError: (e) {
+      setState(() {
+        error = e.message;
+      });
+    });
   }
 
   Future<void> reload() async {
+    setState(() {
+      data = null;
+      error = null;
+    });
+
     onNeedsLogin = (e) async {
       await context.navigator.push(MaterialPageRoute(builder: (context) => LoginPage(client: client)));
       reload();
@@ -42,21 +103,57 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    final addButton = IconButton(onPressed: () async {
+      await showDialog(context: context, builder: (context) => EditLinkPage(currentLinks: data?.data?.links ?? []));
+      reload();
+    }, icon: Icon(Icons.add));
+
     return Scaffold(
       appBar: AppBar(
-        title: Text("Clinks"),
+        title: Text("CLinks"),
         centerTitle: true,
         actions: [
-          IconButton(onPressed: () async {
-            await showDialog(context: context, builder: (context) => AddDialogue());
-            reload();
-          }, icon: Icon(Icons.add)),
+          PopupMenuButton(itemBuilder: (context) => SortMode.values.map((x) {
+            return PopupMenuItem(child: Text(x.pretty), onTap: () {
+              setState(() {
+                sorting = x;
+              });
+            });
+          }).toList(), icon: Icon(Icons.sort)),
+          addButton,
         ],
+        leading: IconButton(onPressed: () => reload(), icon: Icon(Icons.refresh)),
       ),
       body: data != null && data!.data != null ? Builder(builder: (context) {
-        final links = data!.data!.links;
+        final links = data!.data!.links.sorted(sorting.sort);
 
-        return ListView.builder(itemCount: links.length, itemBuilder: (context, i) => LinkWidget(link: links[i]));
+        if (links.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("Hey there!").fontSize(24),
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "You haven't created any links yet! Click ",
+                      ),
+                      WidgetSpan(
+                        child: addButton,
+                      ),
+                      TextSpan(
+                        text: " to get started.",
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          );
+        }
+
+        return ListView.builder(itemCount: links.length, itemBuilder: (context, i) => LinkWidget(link: links[i], currentLinks: links, reload: reload));
       }) : (error != null ? Center(child: Text("Error: $error")) : Center(child: CircularProgressIndicator())),
     );
   }
@@ -64,7 +161,10 @@ class _HomeState extends State<Home> {
 
 class LinkWidget extends StatefulWidget {
   final LinksGet200ResponseDataLinksInner link;
-  const LinkWidget({super.key, required this.link});
+  final List<LinksGet200ResponseDataLinksInner> currentLinks;
+  final VoidCallback reload;
+
+  const LinkWidget({super.key, required this.link, required this.currentLinks, required this.reload});
 
   @override
   State<LinkWidget> createState() => _LinkWidgetState();
@@ -76,12 +176,12 @@ class _LinkWidgetState extends State<LinkWidget> {
     final link = widget.link;
 
     return ListTile(
-      title: Text(link.id),
+      title: SelectableText(link.id),
       subtitle: Text.rich(
         TextSpan(
           children: [
             TextSpan(
-              text: "${DateFormat('MMMM d, yyyy, h:mm a', Localizations.localeOf(context).toLanguageTag()).format(link.created)}\n",
+              text: "${{"Created": link.created, "Last Used": ?link.used}.entries.map((x) => "${x.key}: ${DateFormat('MMMM d, yyyy, h:mm a', Localizations.localeOf(context).toLanguageTag()).format(x.value.toLocal())}").join("\n")}\nUses: ${link.uses}\n",
             ),
             TextSpan(
               text: link.logic.defaultUrl,
@@ -99,6 +199,20 @@ class _LinkWidgetState extends State<LinkWidget> {
         ),
       ),
       isThreeLine: true,
+      trailing: IconButton(onPressed: () {
+        final page = EditLinkPage(currentLinks: widget.currentLinks, existing: ExistingLinkData(link: link, onDelete: (completer) async {
+          await client.request((DefaultApi api) => api.linkDelete(accountSessionDeleteRequest: AccountSessionDeleteRequest(id: link.id)), onData: (data) {
+            showSnackBar(context, data.message);
+            completer.complete(true);
+            widget.reload.call();
+          }, onError: (e) {
+            showSnackBar(context, e.message ?? "Unable to delete link. An unknown error occurred.");
+            completer.complete(false);
+          });
+        }));
+
+        SimpleNavigator.navigate(context: context, page: page);
+      }, icon: Icon(Icons.edit)),
     );
   }
 }
