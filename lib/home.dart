@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:links/main.dart';
 import 'package:links/new.dart';
 import 'package:localpkg_flutter/functions.dart';
+import 'package:localpkg_flutter/localpkg.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 typedef PathType = LinkGet200ResponseDataLogicPathsInnerConditionsInnerTypeEnum;
@@ -63,6 +64,10 @@ class _HomeState extends State<Home> {
   String? error;
   SortMode sorting = SortMode.youngestToOldest;
 
+  bool search = false;
+  TextEditingController searchController = TextEditingController();
+  FocusNode searchNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -110,9 +115,19 @@ class _HomeState extends State<Home> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("CLinks"),
+        title: search ? TextFormField(
+          focusNode: searchNode,
+          controller: searchController,
+          onChanged: (value) => setState(() {}),
+        ) : Text("CLinks"),
         centerTitle: true,
         actions: [
+          IconButton(onPressed: () {
+            setState(() {
+              search = !search;
+              searchNode.requestFocus();
+            });
+          }, icon: search ? Icon(Icons.cancel_outlined) : Icon(Icons.search)),
           PopupMenuButton(itemBuilder: (context) => SortMode.values.map((x) {
             return PopupMenuItem(child: Text(x.pretty), onTap: () {
               setState(() {
@@ -125,7 +140,19 @@ class _HomeState extends State<Home> {
         leading: IconButton(onPressed: () => reload(), icon: Icon(Icons.refresh)),
       ),
       body: data != null && data!.data != null ? Builder(builder: (context) {
-        final links = data!.data!.links.sorted(sorting.sort);
+        final links = data!.data!.links.where((x) {
+          if (!search || searchController.text.isEmptyTrimmed) return true;
+
+          bool contains(List<String> a) {
+            return a.any((y) => y.toLowerCase().contains(searchController.text.toLowerCase()));
+          }
+
+          return contains([
+            x.id,
+            x.logic.defaultUrl,
+            ...x.logic.paths.map((x) => x.url),
+          ]);
+        }).sorted(sorting.sort);
 
         if (links.isEmpty) {
           return Center(
