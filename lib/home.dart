@@ -174,9 +174,20 @@ class _LinkWidgetState extends State<LinkWidget> {
   @override
   Widget build(BuildContext context) {
     final link = widget.link;
+    final url = "https://links.calebh101.net/${link.id}";
 
     return ListTile(
-      title: SelectableText(link.id),
+      title: SelectableText.rich(
+        TextSpan(
+          text: url,
+          style: TextStyle(
+            color: Colors.blue,
+          ),
+          recognizer: TapGestureRecognizer()..onTap = () async {
+            if (await canLaunchUrlString(url)) await launchUrlString(url);
+          },
+        ),
+      ),
       subtitle: Text.rich(
         TextSpan(
           children: [
@@ -199,7 +210,7 @@ class _LinkWidgetState extends State<LinkWidget> {
         ),
       ),
       isThreeLine: true,
-      trailing: IconButton(onPressed: () {
+      trailing: IconButton(onPressed: () async {
         final page = EditLinkPage(currentLinks: widget.currentLinks, existing: ExistingLinkData(link: link, onDelete: (completer) async {
           await client.request((DefaultApi api) => api.linkDelete(accountSessionDeleteRequest: AccountSessionDeleteRequest(id: link.id)), onData: (data) {
             showSnackBar(context, data.message);
@@ -211,7 +222,8 @@ class _LinkWidgetState extends State<LinkWidget> {
           });
         }));
 
-        SimpleNavigator.navigate(context: context, page: page);
+        await showDialog(context: context, builder: (context) => page);
+        widget.reload();
       }, icon: Icon(Icons.edit)),
     );
   }
