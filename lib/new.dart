@@ -51,7 +51,7 @@ class _EditLinkPageState extends State<EditLinkPage> {
       final existing = widget.existing!.link;
 
       urlController.text = existing.logic.defaultUrl;
-      paths = existing.logic.paths.map((x) => Path(conditions: x.conditions, url: x.url)).toList();
+      paths = existing.logic.paths.map((x) => Path(conditions: x.conditions, url: TextEditingController()..text = x.url)).toList();
       advancedLogic = paths.isNotEmpty;
     }
 
@@ -115,7 +115,7 @@ class _EditLinkPageState extends State<EditLinkPage> {
                       final existing = widget.existing?.link;
                       final api = DefaultApi(client);
                       final result = await request(() async => api.linkPut(linkPutRequest: LinkPutRequest(id: existing?.id, data: LinkGet200ResponseDataLogic(defaultUrl: urlController.text, paths: paths.map((x) {
-                        return LinkGet200ResponseDataLogicPathsInner(url: x.url, conditions: x.conditions);
+                        return LinkGet200ResponseDataLogicPathsInner(url: x.url!.text, conditions: x.conditions);
                       }).toList()))));
 
                       if (result?.t?.data != null) {

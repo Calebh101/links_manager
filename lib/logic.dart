@@ -7,14 +7,15 @@ import 'package:localpkg_flutter/localpkg.dart';
 
 class Path {
   final UniqueKey key = UniqueKey();
-  String url;
   List<LinkGet200ResponseDataLogicPathsInnerConditionsInner> conditions;
+
   FormKey? formKey;
+  TextEditingController? url;
 
   Path({
-    required this.url,
     required this.conditions,
     this.formKey,
+    this.url,
   });
 }
 
@@ -49,7 +50,7 @@ class _LogicChooseWidgetState extends State<LogicChooseWidget> {
       buildDefaultDragHandles: false,
       footer: ListTile(
         title: Text("New Path"),
-        onTap: () => setState(() => paths.add(Path(url: "", conditions: []))),
+        onTap: () => setState(() => paths.add(Path(conditions: []))),
       ),
     );
   }
@@ -67,12 +68,15 @@ class LogicItem extends StatefulWidget {
 }
 
 class _LogicItemState extends State<LogicItem> {
-  final urlController = TextEditingController();
+  late TextEditingController urlController;
   final key = FormKey();
 
   @override
   void initState() {
-    urlController.text = widget.path.url;
+    widget.path.url ??= TextEditingController();
+    urlController = widget.path.url!;
+
+    urlController.text = widget.path.url?.text ?? "";
     widget.path.formKey = key;
     super.initState();
   }
@@ -82,7 +86,6 @@ class _LogicItemState extends State<LogicItem> {
     final i = widget.index;
     final conditions = widget.path.conditions;
     final url = widget.path.url;
-    widget.path.url = urlController.text;
 
     return ListTile(
       leading: ReorderableDragStartListener(
