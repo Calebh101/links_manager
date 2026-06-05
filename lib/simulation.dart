@@ -45,13 +45,24 @@ class _SimulationCreationState extends State<SimulationCreation> {
                 mainAxisSize: .min,
                 children: [
                   Text(s.pretty),
-                  DropdownButton<String>(value: widget.machine.properties[s.id.value], items: s.options.mapTo((k, v) {
-                    return DropdownMenuItem<String>(
-                      value: k,
-                      child: Text(v),
-                    );
-                  }).toList(), onChanged: (value) {
-                    if (value == null) return;
+                  DropdownButton<String>(value: widget.machine.properties[s.id.value] ?? "N/A", items: [
+                    DropdownMenuItem(
+                      value: null,
+                      child: Text("N/A"),
+                    ),
+                    ...s.options.mapTo((k, v) {
+                      return DropdownMenuItem<String>(
+                        value: k,
+                        child: Text(v),
+                      );
+                    }),
+                  ], onChanged: (value) {
+                    if (value == null) {
+                      widget.machine.properties.remove(s.id.value);
+                      setState(() {});
+                      return;
+                    }
+
                     widget.machine.properties[s.id.value] = value;
                     setState(() {});
                   }),
