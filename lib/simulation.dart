@@ -37,18 +37,26 @@ class _SimulationCreationState extends State<SimulationCreation> {
     return AlertDialog(
       title: Text("Simulation"),
       content: Column(
+        mainAxisSize: .min,
         children: [
           Wrap(
             children: schema!.map((s) {
-              return DropdownButton<String>(value: widget.machine.properties[s.id.value], items: s.options.mapTo((k, v) {
-                return DropdownMenuItem<String>(
-                  child: Text("${s.pretty}: $v"),
-                );
-              }).toList(), onChanged: (value) {
-                if (value == null) return;
-                widget.machine.properties[s.id.value] = value;
-                setState(() {});
-              });
+              return Column(
+                mainAxisSize: .min,
+                children: [
+                  Text(s.pretty),
+                  DropdownButton<String>(value: widget.machine.properties[s.id.value], items: s.options.mapTo((k, v) {
+                    return DropdownMenuItem<String>(
+                      value: k,
+                      child: Text(v),
+                    );
+                  }).toList(), onChanged: (value) {
+                    if (value == null) return;
+                    widget.machine.properties[s.id.value] = value;
+                    setState(() {});
+                  }),
+                ],
+              );
             }).toList(),
           ),
           ElevatedButton(
@@ -71,7 +79,7 @@ class _SimulationCreationState extends State<SimulationCreation> {
           ),
           if (simulated) ...[
             10.vert(),
-            Text(result == null ? "Default URL: ${widget.defaultUrl}" : "Path #${result!.$1 + 1}: ${result?.$2.url}"),
+            Text(result == null ? "Default URL: ${widget.defaultUrl}" : "Path #${result!.$1 + 1}: ${result?.$2.url?.text.nullIfEmptyTrimmed ?? "Nothing inputted"}"),
           ],
         ],
       ),
