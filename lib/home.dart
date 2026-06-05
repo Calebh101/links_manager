@@ -1,11 +1,13 @@
+import 'dart:convert';
+
 import 'package:calebh101_server_flutter/calebh101_server_flutter.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:links/main.dart';
 import 'package:links/new.dart';
-import 'package:localpkg_flutter/functions.dart';
 import 'package:localpkg_flutter/localpkg.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -77,6 +79,7 @@ class _HomeState extends State<Home> {
   Future<void> init() async {
     await client.request((DefaultApi api) => api.linkOptionsGet(), onData: (data) {
       schema = data.data;
+      if (kDebugMode) Logger.print("Schema", "Found schema: ${jsonEncode(schema)}");
       reload();
     }, onError: (e) {
       setState(() {

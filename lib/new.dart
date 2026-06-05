@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:links/logic.dart';
 import 'package:links/main.dart';
+import 'package:links/simulation.dart';
 import 'package:localpkg_flutter/localpkg.dart';
 
 class ExistingLinkData {
@@ -27,6 +28,7 @@ class EditLinkPage extends StatefulWidget {
 class _EditLinkPageState extends State<EditLinkPage> {
   final key = FormKey();
   final urlController = TextEditingController();
+  final machine = SimulationMachine(properties: {});
 
   bool advancedLogic = false;
   List<Path> paths = [];
@@ -168,6 +170,22 @@ class _EditLinkPageState extends State<EditLinkPage> {
                       ),
                     ),
                     child: Text("Delete"),
+                  ),
+                  if (hasLogic)
+                  ElevatedButton(
+                    onPressed: () async {
+                      showDialog(context: context, builder: (context) => SimulationCreation(machine: machine, defaultUrl: urlController.text, paths: paths));
+                    },
+                    style: ElevatedButton.styleFrom(
+                      fixedSize: Size(150, 70),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      textStyle: TextStyle(
+                        fontSize: 20,
+                      ),
+                    ),
+                    child: Text("Simulate"),
                   ),
                 ],
               ),
